@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>jsPDF Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <button id="exportPdfButton">Export PDF</button>
+    <script>
+        document.getElementById('exportPdfButton').addEventListener('click', function() {
+            const doc = new jsPDF();
+            doc.text('Hello, this is a test PDF!', 10, 10);
+            doc.save('test.pdf');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+   <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.84.0">
+    <title>Sagara's Payroll</title>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Include DataTables and other libraries -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    
+    <!-- Favicons -->
+    {% comment %} <link rel="apple-touch-icon" href="/docs/5.0/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="/docs/5.0/assets/img/favicons/manifest.json">
+    <link rel="mask-icon" href="/docs/5.0/assets/img/favicons/safari-pinned-tab.svg" color="#7952b3">
+    <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon.ico">
+    <meta name="theme-color" content="#7952b3"> {% endcomment %}
+
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+      .modal-lg {
+        max-width: 800px; /* Adjust this value as needed */
+      }
+    </style>
+
+    
+    <!-- Custom styles for this template -->
+    {% comment %} <link href="cover.css" rel="stylesheet"> {% endcomment %}
+  </head>
+  <body class="d-flex h-100 text-center text-white bg-dark">
+    
+    <div class="cover-container d-flex w-100 h-50 p-3 mx-auto flex-column">
+        <header class="mb-4 d-flex justify-content-between align-items-center bg-dark">
+          <div class="row">
+            <div class="col-md-9">
+              <h3 class="mb-3 text-start">
+                  <a href="">
+                      {% load static %}
+                      <img src="{% static 'img/sagara-logo.png' %}" alt="Sagara Technology" style="width: 13%" />
+                  </a>
+              </h3>
+            </div>
+            <div class="col-md-2 text-end">
+              <button type="button" class="btn btn-warning mt-2" data-bs-toggle="modal" data-bs-target="#importAbsenModal">
+                  + Import Absen
+              </button>
+            </div>
+            <div class="col-md-1">
+              <form>
+                {% csrf_token %}
+                <button id="logoutButton" type="button" class="btn btn-danger mt-2">
+                    Log out
+                </button>
+              <form>
+            </div>
+          </div>
+          <div class="modal fade" id="importAbsenModal" tabindex="-1" aria-labelledby="importAbsenModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content text-dark">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importAbsenModalLabel">Import Absen</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="absenFile" class="form-label">Select Absen File</label>
+                                <input type="file" class="form-control" id="absenFile" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+                            </div>
+                            <div id="uploadProgress" class="d-none text-dark">
+                              <div class="spinner-border text-dark" role="status">
+                                  <span class="visually-hidden">Loading...</span>
+                              </div>
+                              Uploading...
+                          </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="uploadAbsenFile()">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </header>
+
+        <main>
+          
+          <!-- Data Gaji -->
+            <div class="row bg-light mx-3 mb-5 rounded">
+              <!-- Gaji Karyawan Tetap -->
+              <div class="mb-5 p-0">
+                <div class="col-md-12 p-0 text-start text-dark">
+                  <a href="#" class="btn btn-primary form-control">
+                    <div class="row">
+                      <div class="col">
+                        <h3 class="my-2">Data Gaji Karyawan Tetap</h3>
+                      </div>
+                    </div>
+                  </a>
+                  <hr class="m-0">
+                </div>
+                <div class="col-md-12 text-start text-dark p-4" >
+                  <div class="text-center">
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-success my-2" data-bs-toggle="modal" data-bs-target="#modalGajiTetap">
+                      + Data Gaji
+                    </button>
+  
+                    <!-- Modal -->
+                    <div class="modal fade" id="modalGajiTetap" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                          <form id="insertFormTetap" method="POST" action="">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">Tambah Data Gaji Karyawan Tetap</h5>
+                            </div>
+                            <div class="modal-body text-start">
+                              
+                              <div class="mb-3 row">
+                                <label for="nipSelect" class="col-sm-2 col-form-label">NIP</label>
+                                <div class="col-sm-10">
+                                  <select id="nipSelect" name="nip" class="form-select">
+                                    <option>-- Pilih --<option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="mb-3 row">
+                                <label for="namaSelect" class="col-sm-2 col-form-label">Nama</label>
+                                <div class="col-sm-10">
+                                  <select id="namaSelect" name="nama" class="form-select">
+                                    <option>-- Pilih --<option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="mb-3 row">
+                                <label for="tunjangan_cuti" class="col-sm-2 col-form-label">Tunjangan Cuti</label>
+                                <div class="col-sm-10">
+                                  <input type="text" class="form-control" id="tunjangan_cuti" name="tunjangan_cuti">
+                                </div>
+                              </div>
+                              <div class="mb-3 row">
+                                <label for="tunjangan_transport" class="col-sm-2 col-form-label">Tunjangan Transport</label>
+                                <div class="col-sm-10">
+                                  <input type="text" class="form-control" id="tunjangan_transport" name="tunjangan_transport">
+                                </div>
+                              </div>
+                              <div class="mb-3 row">
+                                <label for="tunjangan_makan" class="col-sm-2 col-form-label">Tunjangan Makan</label>
+                                <div class="col-sm-10">
+                                  <input type="text" class="form-control" id="tunjangan_makan" name="tunjangan_makan">
+                                </div>
+                              </div>
+                              <div class="mb-3 row">
+                                <label for="tunjangan_sakit" class="col-sm-2 col-form-label">Tunjangan Sakit</label>
+                                <div class="col-sm-10">
+                                  <input type="text" class="form-control" id="tunjangan_sakit" name="tunjangan_sakit">
+                                </div>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                              <button type="submit" class="btn btn-primary">Tambah</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <table class="display text-dark" id="tableKaryawanTetap">
+                    <thead>
+                      <tr>
+                        <th>NIP</th>
+                        <th>Nama</th>
+                        <th>Gaji Pokok</th>
+                        <th>Tunjangan Sakit</th>
+                        <th>Tunjangan Cuti</th>
+                        <th>Tunjangan Makan</th>
+                        <th>Tunjangan Transport</th>
+                        <th>Total Gaji</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                  </table> 
+                  <!-- EDIT MODAL -->
+                  <div class="modal fade" id="editModalGajiTetap" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <form method="POST" action="" id="editFormTetap">
+                          {% csrf_token %}
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel">Edit Data Gaji</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <input class="d-none" type="text" id="editGajiId" name="gaji_id">
+                            <label for="editNIP">NIP:</label>
+                            <input type="text" id="editNIP" class="form-control" readonly>
+                            <label for="editNama">Nama:</label>
+                            <input type="text" id="editNama" class="form-control" readonly>
+                            <label for="editTunjanganCuti">Tunjangan Cuti:</label>
+                            <input type="text" id="editTunjanganCuti" name="tunjangan_cuti" class="form-control">
+                            <label for="editTunjanganTransport">Tunjangan Transport:</label>
+                            <input type="text" id="editTunjanganTransport" name="tunjangan_transport" class="form-control">
+                            <label for="editTunjanganMakan">Tunjangan Makan:</label>
+                            <input type="text" id="editTunjanganMakan" name="tunjangan_makan" class="form-control">
+                            <label for="editTunjanganSakit">Tunjangan Sakit:</label>
+                            <input type="text" id="editTunjanganSakit" name="tunjangan_sakit" class="form-control">
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Ubah</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>   
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class="row bg-light mx-3 mt-5 rounded">
+              <!-- Gaji Karyawan Freelance -->
+              <div class="mb-5 p-0">
+                <div class="col-md-12 p-0 text-start text-dark">
+                  <a href="#" class="btn btn-danger form-control">
+                    <div class="row">
+                      <div class="col">
+                        <h3 class="my-2">Data Gaji Karyawan Freelance</h3>
+                      </div>
+                    </div>
+                  </a>
+                  <hr class="m-0">
+                </div>
+                <div class="col-md-12 text-start text-dark p-4" >
+                  <div class="text-center">
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-success my-2" data-bs-toggle="modal" data-bs-target="#modalGajiFreelance">
+                      + Data Gaji
+                    </button>
+  
+                    <!-- Modal -->
+                    <div class="modal fade" id="modalGajiFreelance" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+                      <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                          <form class="form-group" id="insertFormFreelance" method="POST" action="">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel2">Tambah Data Gaji Karyawan Freelance</h5>
+                            </div>
+                            <div class="modal-body text-start">
+                                <div class="mb-3 row">
+                                  <label for="nipSelect" class="col-sm-2 col-form-label">NIP</label>
+                                  <div class="col-sm-10">
+                                    <select id="nipSelectK" name="nip" class="form-select">
+                                      <option>-- Pilih --<option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="mb-3 row">
+                                  <label for="namaSelect" class="col-sm-2 col-form-label">Nama</label>
+                                  <div class="col-sm-10">
+                                    <select id="namaSelectK" name="nama" class="form-select">
+                                      <option>-- Pilih --<option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="mb-3 row">
+                                  <label for="gaji_pokok" class="col-sm-2 col-form-label">Gaji Pokok</label>
+                                  <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="gaji_pokok" name="gaji_pokok">
+                                  </div>
+                                </div>
+                                <div class="mb-3 row">
+                                  <label for="total_gaji" class="col-sm-2 col-form-label">Total Gaji</label>
+                                  <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="total_gaji" name="total_gaji">
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                              <button type="submit" class="btn btn-primary">Tambah</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <table class="display text-dark" id="tableKaryawanFreelance" >
+                    <thead>
+                      <tr>
+                        <th>NIP</th>
+                        <th>Nama</th>
+                        <th>Divisi</th>
+                        <th>Gaji Pokok</th>
+                        <th>Total Gaji</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                  </table>    
+                  <!-- EDIT MODAL -->
+                  <div class="modal fade" id="editModalGajiFreelance" tabindex="-1" aria-labelledby="editModalLabel2" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <form id="formEditGajiFreelance" method="POST" action="">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel">Edit Data Gaji Freelancer</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <input type="text" class="d-none" id="editGajiIdField" class="form-control" name="gaji_id">
+                            <label for="editNIP">NIP:</label>
+                            <input type="text" id="editNIPF" class="form-control" name="nip" readonly>
+                            <label for="editNama">Nama:</label>
+                            <input type="text" id="editNamaF" class="form-control" name="nama" readonly>
+                            <label for="editGajiPokok">Gaji Pokok:</label>
+                            <input type="text" id="editGajiPokok" class="form-control" name="gaji_pokok">
+                            <label for="editNama">Total Gaji:</label>
+                            <input type="text" id="editTotalGaji" class="form-control" name="total_gaji">
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Ubah</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            
+            <!-- Input Gaji -->
+
+            <div class="modal" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title text-dark" id="successModalLabel">Updated !</h5>
+                  </div>
+                  <div class="modal-body text-dark">
+                    Data has been successfully updated!
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal fade" id="importSuccessModal" tabindex="-1" aria-labelledby="importSuccessModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                  <div class="modal-content text-dark">
+                      <div class="modal-header">
+                          <h5 class="modal-title" id="importSuccessModalLabel">Import Successful</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                          The import was successful.
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+        </main>
+
+      <footer class="mt-4 text-white-50">
+        <p>Made by <a href="https://instagram.com/deraakbar_" class="text-white">Dera Akbar</a> with ☕.</p>
+      </footer>
+    </div>
+   </body>
+</html>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script>  
+  function uploadAbsenFile() {
+    const fileInput = document.getElementById('absenFile');
+    const file = fileInput.files[0];
+  
+    const formData = new FormData();
+    formData.append('file', file);
+  
+    fileInput.style.display = 'none';
+    const uploadProgress = document.getElementById('uploadProgress');
+    uploadProgress.style.display = 'block';
+    // Send the file to the backend API using Axios
+    axios.post('/import_absen', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: progressEvent => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          uploadProgress.innerText = 'Uploading... ${percentCompleted}%';
+        }
+    })
+    .then(response => {
+        // Show success modal
+        uploadProgress.style.display = 'none';
+        $('#importAbsenModal').modal('hide');
+        $('#importSuccessModal').modal('show');
+        setTimeout(() => {
+          location.reload();
+        }, 800);
+
+    })
+    .catch(error => {
+        // Handle error if needed
+        console.error(error);
+    });
+  }
+
+  console.log("Script is running!");
+  $(document).ready(function() {
+    generateGajiTetap();
+    generateGajiFreelance();
+    setTimeout(()=>{
+      modalEditGajiTetap();
+      modalEditGajiFreelance();
+    }, 500);
+    modalInsertGajiTetap();
+    modalInsertGajiFreelance();
+    // Initialize DataTable
+    const tableGajiTetap = $('#tableKaryawanTetap').DataTable({
+      dom: '<"top"Bf>rt<"bottom"lp><"clear">',
+      buttons: [
+        {
+          extend: 'excel',
+          exportOptions: {
+            columns: ':not(.no-export)' // Exclude columns with the class "no-export"
+          }
+        },
+        {
+          extend: 'pdf',
+          exportOptions: {
+            columns: ':not(.no-export)' // Exclude columns with the class "no-export"
+          }
+        }
+      ],
+      columnDefs: [
+        {
+          targets: -1, // The last column (Action column)
+          className: 'no-export' // Add the class "no-export" to the Action column
+        }
+      ]
+    });
+
+    //Karyawan freelancer
+    const tableGajiFreelance = $('#tableKaryawanFreelance').DataTable({
+      dom: '<"top"Bf>rt<"bottom"lp><"clear">',
+      buttons: [
+        {
+          extend: 'excel',
+          exportOptions: {
+            columns: ':not(.no-export)' // Exclude columns with the class "no-export"
+          }
+        },
+        {
+          extend: 'pdf',
+          exportOptions: {
+            columns: ':not(.no-export)' // Exclude columns with the class "no-export"
+          }
+        }
+      ],
+      columnDefs: [
+        {
+          targets: -1, // The last column (Action column)
+          className: 'no-export' // Add the class "no-export" to the Action column
+        }
+      ]
+    });
+    
+function formatNumber(number) {
+  return number.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+    
+function generateGajiTetap(){
+  axios.get('/data-gaji-tetap')
+    .then(response => {
+      const data = response.data;
+      tableGajiTetap.clear().draw();
+      // Populate the DataTable
+      data.forEach(item => {
+        const formattedGajiPokok = formatNumber(item.gaji_pokok);
+        const formattedTunjanganSakit = formatNumber(item.tunjangan_sakit);
+        const formattedTunjanganCuti = formatNumber(item.tunjangan_cuti);
+        const formattedTunjanganMakan = formatNumber(item.tunjangan_makan);
+        const formattedTunjanganTransport = formatNumber(item.tunjangan_transport);
+        const formattedTotalGaji = formatNumber(item.total_gaji);
+        tableGajiTetap.row.add([
+          item.nip,
+          item.nama,
+          `Rp ${formattedGajiPokok}`,
+          `Rp ${formattedTunjanganSakit}`,
+          `Rp ${formattedTunjanganCuti}`,
+          `Rp ${formattedTunjanganMakan}`,
+          `Rp ${formattedTunjanganTransport}`,
+          `Rp ${formattedTotalGaji}`,
+          `<button class="btn btn-secondary edit-button" data-table="karyawan_tetap" data-gaji-id="${item.gaji_id}">Edit</button>`
+        ]).draw();
+      });
+    }).catch(error => {
+      console.error("Error Fetching Data:", error );
+    })
+}
+
+function modalInsertGajiTetap(){
+  //modalInsert
+  const nipSelect = $('#nipSelect');
+  const namaSelect = $('#namaSelect');
+  axios.get(`data-karyawan-tetap`)
+  .then(response => {
+    const data = response.data
+    data.forEach(item =>{
+      nipSelect.append($('<option>',{
+        value: item.nip,
+        text: item.nip
+      }));
+      namaSelect.append($('<option>',{
+        value: item.nip,
+        text: item.nama
+      }));
+    });
+    nipSelect.on('change', function(){
+      const selectedNip = $(this).val();
+      namaSelect.val(selectedNip);
+    });
+    namaSelect.on('change', function() {
+      const selectedNama = $(this).val();
+      nipSelect.val(selectedNama); // Set the same value for NIP select
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+  });
+  const modal = new bootstrap.Modal(document.getElementById('modalGajiTetap'));
+  document.getElementById('insertFormTetap').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    axios.post('/input-gaji', formData)
+    .then(response => {
+      modal.hide(); // Hide the modal after successful update
+        // You might want to refresh your table data here
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+
+        setTimeout(() => {
+          location.reload();
+        }, 800);
+    })
+    .catch(error=>{
+      console.error(error);
+    })
+  });
+}
+
+function generateGajiFreelance(){
+  axios.get('/data-gaji-freelancer')
+  .then(response => {
+    const dataFreelance = response.data;
+    
+    // Populate the DataTable
+    dataFreelance.forEach(item => {
+      const formattedGajiPokok = formatNumber(item.gaji_pokok);
+      const formattedTotalGaji = formatNumber(item.total_gaji);
+      tableGajiFreelance.row.add([
+        item.nip,
+        item.nama,
+        item.nama_divisi,
+        `Rp ${formattedGajiPokok}`,
+        `Rp ${formattedTotalGaji}`,
+        `<button class="btn btn-secondary edit-button" data-table="karyawan_freelance" data-gaji-id="${item.gaji_id}">Edit</button>`
+      ]).draw();
+    });
+  }).catch(error => {
+    console.error("Error Fetching Data:", error );
+  })
+}
+
+function modalInsertGajiFreelance(){
+  //modalInsert
+  const nipSelect = $('#nipSelectK');
+  const namaSelect = $('#namaSelectK');
+  axios.get(`/data-karyawan-freelance`)
+  .then(response => {
+    const data = response.data
+    data.forEach(item =>{
+      nipSelect.append($('<option>',{
+        value: item.nip,
+        text: item.nip
+      }));
+      namaSelect.append($('<option>',{
+        value: item.nip,
+        text: item.nama
+      }));
+    });
+    nipSelect.on('change', function(){
+      const selectedNip = $(this).val();
+      namaSelect.val(selectedNip);
+    });
+    namaSelect.on('change', function() {
+      const selectedNama = $(this).val();
+      nipSelect.val(selectedNama); // Set the same value for NIP select
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+  });
+  const modal = new bootstrap.Modal(document.getElementById('modalGajiFreelance'));
+  document.getElementById('insertFormFreelance').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    axios.post('/input-gaji-freelance', formData)
+    .then(response => {
+      modal.hide(); // Hide the modal after successful update
+        // You might want to refresh your table data here
+      const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+      successModal.show();
+
+      setTimeout(() => {
+        location.reload();
+      }, 800);
+    })
+    .catch(error=>{
+      console.error(error);
+    })
+  });
+}
+
+function modalEditGajiTetap(){
+  //modalEditTetap
+  const editButtons = document.querySelectorAll('.edit-button[data-table="karyawan_tetap"]');
+  const editGajiId = document.getElementById('editGajiId');
+  const editNIPField = document.getElementById('editNIP');
+  const editNamaField = document.getElementById('editNama');
+  const editTunjanganCuti = document.getElementById('editTunjanganCuti');
+  const editTunjanganTransport = document.getElementById('editTunjanganTransport');
+  const editTunjanganMakan = document.getElementById('editTunjanganMakan');
+  const editTunjanganSakit = document.getElementById('editTunjanganSakit');
+  const modal = new bootstrap.Modal(document.getElementById('editModalGajiTetap'));
+  
+  editButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const gajiId = button.getAttribute('data-gaji-id');
+      axios.get(`/api/get-gaji/${gajiId}`)
+        .then(response => {
+          const dataItem = response.data;
+          if (dataItem) {
+            editGajiId.value = dataItem.gaji_id;
+            editNIPField.value = dataItem.nip;
+            editNamaField.value = dataItem.nama;
+            editTunjanganCuti.value = dataItem.tunjangan_cuti;
+            editTunjanganTransport.value = dataItem.tunjangan_transport;
+            editTunjanganMakan.value = dataItem.tunjangan_makan;
+            editTunjanganSakit.value = dataItem.tunjangan_sakit;
+            modal.show();
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    });
+  });
+  document.getElementById('editFormTetap').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const formData = new FormData(this);
+    axios.put(`/api/get-gaji/${formData.get('gaji_id')}`, formData, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, partial: true })
+      .then(response => {
+        // Handle successful update, e.g., close modal or refresh table
+        modal.hide(); // Hide the modal after successful update
+        // You might want to refresh your table data here
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+
+        setTimeout(() => {
+          location.reload();
+        }, 800);
+        
+      })
+      .catch(error => {
+        console.error('Error updating data:', error);
+        console.log(error.response);
+      });
+  });
+}
+
+function modalEditGajiFreelance(){
+  const editButtons = document.querySelectorAll('.edit-button[data-table="karyawan_freelance"]');
+  const editGajiId = document.getElementById('editGajiIdField');
+  const editNIPField = document.getElementById('editNIPF');
+  const editNamaField = document.getElementById('editNamaF');
+  const editGajiPokokField = document.getElementById('editGajiPokok');
+  const editTotalGajiField = document.getElementById('editTotalGaji');
+  const modal = new bootstrap.Modal(document.getElementById('editModalGajiFreelance'));
+  editButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const gajiId = button.getAttribute('data-gaji-id');
+      axios.get(`/data-gaji-freelancer/update/${gajiId}`)
+        .then(response => {
+          const dataItem = response.data;
+          console.log(dataItem);
+          if (dataItem) {
+            editGajiIdField.value = dataItem.gaji_id;
+            editNIPField.value = dataItem.nip;
+            editNamaField.value = dataItem.nama;
+            editGajiPokokField.value = dataItem.gaji_pokok;
+            editTotalGajiField.value = dataItem.total_gaji;
+            modal.show();
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    });
+  });
+  document.getElementById('formEditGajiFreelance').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const formData = new FormData(this);
+    axios.put(`/data-gaji-freelancer/update/${formData.get('gaji_id')}`, formData, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, partial: true })
+      .then(response => {
+        // Handle successful update, e.g., close modal or refresh table
+        modal.hide(); // Hide the modal after successful update
+        // You might want to refresh your table data here
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+
+        setTimeout(() => {
+          location.reload();
+        }, 800);
+        
+      })
+      .catch(error => {
+        console.error('Error updating data:', error);
+        console.log(error.response);
+      });
+  });
+}
+
+  const logoutButton = document.getElementById('logoutButton');
+  logoutButton.addEventListener('click', async () => {
+    const response = await fetch('{% url 'logout-api' %}', {
+        method: 'POST',
+        // You may need to include headers or credentials if required by your API
+    });
+
+    if (response.ok) {
+        // Redirect to the login page after successful logout
+        window.location.href = '{% url 'login' %}';
+    } else {
+        // Handle logout error here
+        
+        console.error('Logout failed.');
+    }
+  });
+
+});
+</script>
