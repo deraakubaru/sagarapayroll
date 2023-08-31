@@ -90,6 +90,23 @@
         <p>Made by <a href="https://instagram.com/deraakbar_" class="text-white">Dera Akbar</a> with ☕.</p>
       </footer>
     </div>
+
+    <div class="modal fade" id="errorLoginModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content text-dark">
+          <div class="modal-header">
+            <h5 class="modal-title" id="errorModalLabel">Login gagal!</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Email atau password salah!
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
 
@@ -112,8 +129,8 @@
       document.cookie = `authToken=${authToken}; path=/`;
       window.location.href = '{% url 'dashboard'%}';
     } else {
-      const errorData = await response.json();
-      alert("gagal login!")
+      const errorModal = new bootstrap.Modal(document.getElementById("errorLoginModal"));
+      errorModal.show();
     }
   });
 </script>

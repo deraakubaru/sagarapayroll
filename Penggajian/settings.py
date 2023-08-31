@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-8e)m464qy+pw!-@-%7(@3gepb$o40uxj)8iu&#ro@e=cuq$o)m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [".vercel.app"]
 
 AUTH_USER_MODEL = 'gaji_app.User'
 
