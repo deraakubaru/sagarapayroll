@@ -21,9 +21,6 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from gaji_app.views import DivisiView, LoginView, RegisterView, UserRetrieveUpdateDeleteView, UpdateProfileView, AbsenView, GajiView, GajiTetapList, AbsencelImportView, UserDataImportView, DivisiDataImportView, GajiFreelanceList, GajiRetrieveUpdateDeleteView, KaryawanTetapList, KaryawanFreelanceList, GajiFreelanceRUDView, GajiFreelanceCreateView, LogoutAPI
 from gaji_app import views
-from django.views.static import serve
-from django.conf.urls import url
-from django.conf import settings
 
 
 schema_view = swagger_get_schema_view(
@@ -42,10 +39,6 @@ urlpatterns = [
     path('home', views.LoginView.dashboard_view, name = "dashboard"),
     
     path('admin/', admin.site.urls),
-    
-    url(r'^media/(?p<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
-    url(r'^static/(?p<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
-    
     # swagger
     path('swagger/', schema_view.with_ui(
         'swagger', cache_timeout=0), name="schema-swagger-ui"),
