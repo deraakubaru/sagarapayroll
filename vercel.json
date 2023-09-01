@@ -24,7 +24,7 @@
         },
         {
             "src": "/(. *)",
-            "dest": "backend/wsgi.py"
+            "dest": "Penggajian/wsgi.py"
         }
     ]
 }
