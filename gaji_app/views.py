@@ -252,7 +252,6 @@ class GajiView(generics.CreateAPIView):
         tunjangan_transport = serializer.validated_data['tunjangan_transport']
         nip = serializer.validated_data['nip']
         
-        date_str = datetime.now().strftime('%Y-%m-%d')
         today = datetime.today()
         current_year = today.year
         current_month = today.month
@@ -358,12 +357,3 @@ class LogoutAPI(APIView):
         return Response({
             "message": "Logged out successfully"
         })
-
-# @login_required
-# def logout_api(request):
-#         if request.method == 'POST':
-#             # Delete the user's token to log them out
-#             Token.objects.filter(user=request.user).delete()
-#             return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-#         else:
-#             return Response({"message": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
