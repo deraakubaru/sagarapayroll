@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
-from decouple import Config
+from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -96,20 +96,26 @@ WSGI_APPLICATION = 'Penggajian.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'payrolldb',
+#         'USER': 'postgres',
+#         'PASSWORD': 'a08212788988',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'payrolldb',
+        'NAME': 'railway',
         'USER': 'postgres',
-        'PASSWORD': 'a08212788988',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'PASSWORD': '5xezRhoPuwA9efFhqcFu',
+        'HOST': 'containers-us-west-79.railway.app',
+        'PORT': '8015',
     }
 }
-
-DATABASES['default'] = dj_database_url.config()
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
