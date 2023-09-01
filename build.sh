@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # Build the project
+
+python -m venv venv
+.\venv\Scripts\activate
+
 echo "Building the project..."
 pip install -r requirements.txt
 
