@@ -420,8 +420,8 @@
         },
         onUploadProgress: progressEvent => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          uploadProgress.innerText = 'Uploading... ${percentCompleted}%';
-        }
+          uploadProgress.innerText = `Uploading... ${percentCompleted}%`;
+        },
     })
     .then(response => {
         // Show success modal
