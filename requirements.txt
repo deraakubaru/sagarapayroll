@@ -27,7 +27,7 @@ daphne==4.0.0
 defusedxml==0.7.1
 distlib==0.3.6
 dj-database-url==2.1.0
-Django==4.2.4
+Django
 django-allauth==0.51.0
 django-cors-headers==3.13.0
 django-extensions==3.2.1
@@ -41,7 +41,7 @@ django-templated-mail==1.1.1
 djangorestframework==3.14.0
 djangorestframework-jwt
 djangorestframework-simplejwt
-djongo==1.3.6
+djongo
 drf-yasg==1.21.4
 et-xmlfile==1.1.0
 Fabric3==1.14.post1
