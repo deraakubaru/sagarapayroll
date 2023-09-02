@@ -171,13 +171,13 @@
                                   <input type="text" class="form-control" id="tunjangan_makan" name="tunjangan_makan">
                                 </div>
                               </div>
-                              <div class="mb-3 row">
+                              {% comment %} <div class="mb-3 row">
                                 <label for="tunjangan_sakit" class="col-sm-2 col-form-label">Tunjangan Sakit</label>
                                 <div class="col-sm-10">
                                   <input type="text" class="form-control" id="tunjangan_sakit" name="tunjangan_sakit">
                                 </div>
                               </div>
-                            </div>
+                            </div> {% endcomment %}
                             <div class="modal-footer">
                               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                               <button type="submit" class="btn btn-primary">Tambah</button>
@@ -193,7 +193,6 @@
                         <th>NIP</th>
                         <th>Nama</th>
                         <th>Gaji Pokok</th>
-                        <th>Tunjangan Sakit</th>
                         <th>Tunjangan Cuti</th>
                         <th>Tunjangan Makan</th>
                         <th>Tunjangan Transport</th>
@@ -226,8 +225,8 @@
                             <input type="text" id="editTunjanganTransport" name="tunjangan_transport" class="form-control">
                             <label for="editTunjanganMakan">Tunjangan Makan:</label>
                             <input type="text" id="editTunjanganMakan" name="tunjangan_makan" class="form-control">
-                            <label for="editTunjanganSakit">Tunjangan Sakit:</label>
-                            <input type="text" id="editTunjanganSakit" name="tunjangan_sakit" class="form-control">
+                            {% comment %} <label for="editTunjanganSakit">Tunjangan Sakit:</label>
+                            <input type="text" id="editTunjanganSakit" name="tunjangan_sakit" class="form-control"> {% endcomment %}
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -511,7 +510,6 @@ function generateGajiTetap(){
       // Populate the DataTable
       data.forEach(item => {
         const formattedGajiPokok = formatNumber(item.gaji_pokok);
-        const formattedTunjanganSakit = formatNumber(item.tunjangan_sakit);
         const formattedTunjanganCuti = formatNumber(item.tunjangan_cuti);
         const formattedTunjanganMakan = formatNumber(item.tunjangan_makan);
         const formattedTunjanganTransport = formatNumber(item.tunjangan_transport);
@@ -520,7 +518,6 @@ function generateGajiTetap(){
           item.nip,
           item.nama,
           `Rp ${formattedGajiPokok}`,
-          `Rp ${formattedTunjanganSakit}`,
           `Rp ${formattedTunjanganCuti}`,
           `Rp ${formattedTunjanganMakan}`,
           `Rp ${formattedTunjanganTransport}`,
@@ -681,7 +678,6 @@ function modalEditGajiTetap(){
             editTunjanganCuti.value = dataItem.tunjangan_cuti;
             editTunjanganTransport.value = dataItem.tunjangan_transport;
             editTunjanganMakan.value = dataItem.tunjangan_makan;
-            editTunjanganSakit.value = dataItem.tunjangan_sakit;
             modal.show();
           }
         })
