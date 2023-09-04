@@ -155,8 +155,8 @@ def find_gaji_pokok(upah_bulan, total_hari_kerja, jml_hari_masuk):
     gaji_pokok = gaji - (upah_bulan* 0.05)
     return gaji_pokok
     
-def find_total_gaji(gaji_pokok, tunjangan_cuti, tunjangan_sakit, tunjangan_makan, tunjangan_transport):
+def find_total_gaji(gaji_pokok, tunjangan_cuti, tunjangan_makan, tunjangan_transport):
     gaji_bersih_tahun = gaji_pokok * 12
     pph = (gaji_bersih_tahun - 48000000) * 0.05 / 12
-    total_gaji = gaji_pokok - pph + tunjangan_cuti + tunjangan_sakit + tunjangan_makan + tunjangan_transport
+    total_gaji = gaji_pokok - pph + tunjangan_cuti + tunjangan_makan + tunjangan_transport
     return total_gaji
