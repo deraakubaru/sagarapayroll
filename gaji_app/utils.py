@@ -89,7 +89,7 @@ def divisi_excel_file(file):
 def riwayat_absen(nip):
         today = datetime.today()
         current_year = today.year
-        current_month = today.month
+        current_month = 8
         last_day = calendar.monthrange(current_year, current_month)[1]
         
         start_date = today.replace(day=1)
