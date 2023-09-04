@@ -176,8 +176,8 @@
                                 <div class="col-sm-10">
                                   <input type="text" class="form-control" id="tunjangan_sakit" name="tunjangan_sakit">
                                 </div>
-                              </div>
-                            </div> {% endcomment %}
+                              </div>{% endcomment %}
+                            </div> 
                             <div class="modal-footer">
                               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                               <button type="submit" class="btn btn-primary">Tambah</button>
@@ -662,7 +662,6 @@ function modalEditGajiTetap(){
   const editTunjanganCuti = document.getElementById('editTunjanganCuti');
   const editTunjanganTransport = document.getElementById('editTunjanganTransport');
   const editTunjanganMakan = document.getElementById('editTunjanganMakan');
-  const editTunjanganSakit = document.getElementById('editTunjanganSakit');
   const modal = new bootstrap.Modal(document.getElementById('editModalGajiTetap'));
   
   editButtons.forEach(button => {
