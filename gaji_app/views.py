@@ -103,7 +103,6 @@ class GajiRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         serializer.is_valid(raise_exception=True)
 
         nip = instance.nip
-        tunjangan_sakit = serializer.validated_data.get('tunjangan_sakit', instance.tunjangan_sakit)
         tunjangan_cuti = serializer.validated_data.get('tunjangan_cuti', instance.tunjangan_cuti)
         tunjangan_makan = serializer.validated_data.get('tunjangan_makan', instance.tunjangan_makan)
         tunjangan_transport = serializer.validated_data.get('tunjangan_transport', instance.tunjangan_transport)
@@ -127,12 +126,11 @@ class GajiRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         divisi = karyawan.divisi
         upah_bulan = basic_salary(posisi, divisi)
         gaji_pokok = find_gaji_pokok(upah_bulan, total_hari_kerja, jml_hari_masuk)
-        total_gaji = find_total_gaji(gaji_pokok, tunjangan_cuti, tunjangan_sakit, tunjangan_makan, tunjangan_transport)
+        total_gaji = find_total_gaji(gaji_pokok, tunjangan_cuti, tunjangan_makan, tunjangan_transport)
             
         # Update the instance with new values
         instance.bulan = bulan
         instance.gaji_pokok = gaji_pokok
-        instance.tunjangan_sakit = tunjangan_sakit
         instance.tunjangan_cuti = tunjangan_cuti
         instance.tunjangan_makan = tunjangan_makan
         instance.tunjangan_transport = tunjangan_transport
@@ -143,14 +141,13 @@ class GajiRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             "message": "Gaji updated successfully",
             "bulan": bulan,
             "gaji_pokok": gaji_pokok,
-            "tunjangan_sakit": instance.tunjangan_sakit,
             "tunjangan_cuti": instance.tunjangan_cuti,
             "tunjangan_transport": instance.tunjangan_transport,
             "tunjangan_makan": instance.tunjangan_makan,
             "hari": jml_hari_masuk,
             "total_gaji": total_gaji,
         })
-    
+      
 class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
     # queryset = Karyawan.objects.all()
     serializer_class = KaryawanSerializer
@@ -246,10 +243,6 @@ class GajiView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data, context = {'request': request})
         serializer.is_valid(raise_exception=True)
         
-        tunjangan_sakit = serializer.validated_data['tunjangan_sakit']
-        tunjangan_cuti = serializer.validated_data['tunjangan_cuti']
-        tunjangan_makan = serializer.validated_data['tunjangan_makan']
-        tunjangan_transport = serializer.validated_data['tunjangan_transport']
         nip = serializer.validated_data['nip']
         
         today = datetime.today()
@@ -258,25 +251,39 @@ class GajiView(generics.CreateAPIView):
         bulan = today.strftime("%B")
         total_hari_kerja = hari_kerja(current_year, current_month)
         hitung_absen = riwayat_absen(nip)
-            
         
         jml_hari_masuk = 0
+        jml_hari_cuti = 0
+        
         for item in hitung_absen:
             if item['keterangan'] == 'masuk':
                 jml_hari_masuk += item['count']
-            
+        
+        for item in hitung_absen:
+            if item['keterangan'] == 'cuti':
+                jml_hari_cuti += item['count']
+                
+        if jml_hari_cuti > 5 :
+            tunjangan_cuti = 500000
+        else :
+            tunjangan_cuti = 100000 * jml_hari_cuti
+        
+                
         karyawan = Karyawan.objects.get(nip=nip)
         posisi = karyawan.position
         divisi = karyawan.divisi
         upah_bulan = basic_salary(posisi, divisi)
         gaji_pokok = find_gaji_pokok(upah_bulan, total_hari_kerja, jml_hari_masuk)
-        total_gaji = find_total_gaji(gaji_pokok, tunjangan_cuti, tunjangan_sakit, tunjangan_makan, tunjangan_transport)
-            
+        
+        tunjangan_transport = upah_bulan * 0.10
+        tunjangan_makan = upah_bulan * 0.10
+        
+        total_gaji = find_total_gaji(gaji_pokok, tunjangan_cuti, tunjangan_makan, tunjangan_transport)
+        
         Gaji.objects.create(
             nip=karyawan,
             bulan=bulan,
             gaji_pokok=gaji_pokok,
-            tunjangan_sakit=tunjangan_sakit,
             tunjangan_makan=tunjangan_makan,
             tunjangan_transport=tunjangan_transport,
             tunjangan_cuti=tunjangan_cuti,
@@ -288,14 +295,13 @@ class GajiView(generics.CreateAPIView):
             "message": "Gaji instance created successfully",
             "bulan": bulan,
             "gaji_pokok": gaji_pokok,
-            "tunjangan_sakit": tunjangan_sakit,
             "tunjangan_cuti": tunjangan_cuti,
             "tunjangan_transport": tunjangan_transport,
             "tunjangan_makan": tunjangan_makan,
             "hari": jml_hari_masuk,
             "total_gaji": total_gaji,
         })
-        
+       
 class AbsencelImportView(APIView):
     def post(self, request, format=None):
         serializer = ExcellFileSerializer(data=request.data)
