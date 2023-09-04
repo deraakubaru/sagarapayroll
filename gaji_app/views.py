@@ -110,7 +110,7 @@ class GajiRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         # Perform calculations or other necessary logic here
         today = datetime.today()
         current_year = today.year
-        current_month = today.month
+        current_month = 8
         bulan = today.strftime("%B")
         total_hari_kerja = hari_kerja(current_year, current_month)
         hitung_absen = riwayat_absen(nip)
@@ -247,7 +247,7 @@ class GajiView(generics.CreateAPIView):
         
         today = datetime.today()
         current_year = today.year
-        current_month = today.month
+        current_month = 8
         bulan = today.strftime("%B")
         total_hari_kerja = hari_kerja(current_year, current_month)
         hitung_absen = riwayat_absen(nip)
